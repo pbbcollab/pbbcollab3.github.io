@@ -6,15 +6,15 @@
   --panel: rgba(255, 250, 240, 0.94);
   --panel-border: #d4c0a0;
   --search-text: #8a7a68;
-  --kapamilya: #1d4ed8;
-  --kapuso: #e11d48;
+  --kapamilya: #e11d48;
+  --kapuso: #1d4ed8;
   --nominated: #f5c518;
   --evicted: #6b7280;
   --immunity: #d4a017;
   --safe: #1b7a3d;
   --checked: #7b787ae0;
-  --a-rank: #1d4ed8;
-  --b-rank: #e11d48;
+  --a-rank: #e11d48;
+  --b-rank: #1d4ed8;
   --no-rank: #252628;
   --banner-gold: #ffde59;
 }
