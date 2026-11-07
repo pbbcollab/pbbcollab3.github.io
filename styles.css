@@ -234,6 +234,14 @@ body {
   flex: 1;
 }
 
+.table__empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .table__entry {
   display: flex;
   align-items: flex-start;

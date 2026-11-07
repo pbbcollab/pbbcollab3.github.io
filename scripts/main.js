@@ -158,6 +158,13 @@ function statusLabel(housemate) {
 
 function populateTable(list) {
   let table = document.getElementById("table__entry-container");
+  if (!list.length) {
+    table.insertAdjacentHTML(
+      "beforeend",
+      '<div class="table__empty">No housemates match this filter yet.</div>'
+    );
+    return;
+  }
   for (let i = 0; i < list.length; i++) {
     table.insertAdjacentHTML("beforeend", populateTableEntry(list[i]));
     let insertedEntry = table.lastChild;
