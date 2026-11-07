@@ -4,9 +4,11 @@ var ranking = [];
 
 document.addEventListener("DOMContentLoaded", async function () {
   ranking = newRanking();
-  getRanking();
+  // Housemates must load before applying ?r= so share links can resolve IDs.
   await readFromCSV("./housemate_info.csv");
+  getRanking();
   populateRanking();
+  rerenderTable();
 });
 
 function newRanking() {
@@ -102,7 +104,22 @@ function getRanking() {
   var urlParams = new URLSearchParams(window.location.search);
   if (!urlParams.has("r")) return;
 
-  let rankString = atob(urlParams.get("r"));
+  let encoded = urlParams.get("r");
+  if (!encoded) return;
+
+  let rankString;
+  try {
+    // Support both encodeURIComponent'd links and older unencoded ones.
+    rankString = atob(decodeURIComponent(encoded));
+  } catch (err) {
+    try {
+      rankString = atob(encoded);
+    } catch (err2) {
+      console.error("Could not decode share link ranking:", err2);
+      return;
+    }
+  }
+
   let rankingIds = [];
   for (let i = 0; i < rankString.length; i += 2) {
     let housemateId = rankString.substr(i, 2);
@@ -112,12 +129,16 @@ function getRanking() {
 
   for (let i = 0; i < rankingIds.length && i < ranking.length; i++) {
     let housemateId = rankingIds[i];
-    if (housemateId < 0) {
+    if (housemateId < 0 || Number.isNaN(housemateId)) {
       ranking[i] = newHousemate();
     } else {
       let housemate = findHousemateById(housemateId);
-      if (housemate.id >= 0) housemate.selected = true;
-      ranking[i] = housemate;
+      if (housemate.id >= 0) {
+        housemate.selected = true;
+        ranking[i] = housemate;
+      } else {
+        ranking[i] = newHousemate();
+      }
     }
   }
 }
@@ -344,7 +365,8 @@ function generateShareLink() {
       rankString += ("0" + ranking[i].id).slice(-2);
     }
   }
-  let link = window.location.origin + window.location.pathname + "?r=" + btoa(rankString);
+  let encoded = encodeURIComponent(btoa(rankString));
+  let link = window.location.origin + window.location.pathname + "?r=" + encoded;
   let textbox = document.getElementById("getlink-textbox");
   let copyBtn = document.getElementById("copylink-button");
   textbox.style.display = "inline-block";
