@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>PBB Collab 3.0 Big 4 Ranker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="description" content="Rank your Kapamilya and Kapuso Big 4 for Pinoy Big Brother Collab 3.0." />
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" type="text/css" media="screen" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="top-banner">
+    <p id="version">v3.0.0</p>
+    <img id="banner-image" src="assets/logo_pbb.png" alt="Pinoy Big Brother Collab 3.0" />
+    <p id="banner-title">WHO WINS... YOU DECIDE!</p>
+    <p id="banner-subtitle">Who are your KAPAMILYA and KAPUSO BIG 4?</p>
+  </div>
+
+  <div class="flex-container padded-box">
+    <div>
+      <div id="table">
+        <div id="table__filter-container">
+          <input id="table__filter-input" oninput="filterHousemates(event)" type="text" placeholder="Search Housemate/s" aria-label="Search housemates" />
+        </div>
+
+        <div id="status-filters" class="filter-chips" role="group" aria-label="Housemate filters">
+          <button type="button" class="filter-chip is-active" data-filter="all" onclick="setStatusFilter('all', this)">All</button>
+          <button type="button" class="filter-chip chip-kapamilya" data-filter="kapamilya" onclick="setStatusFilter('kapamilya', this)">Kapamilya Housemates</button>
+          <button type="button" class="filter-chip chip-kapuso" data-filter="kapuso" onclick="setStatusFilter('kapuso', this)">Kapuso Housemates</button>
+          <button type="button" class="filter-chip chip-nominated" data-filter="nominated" onclick="setStatusFilter('nominated', this)">Nominated</button>
+          <button type="button" class="filter-chip chip-evicted" data-filter="evicted" onclick="setStatusFilter('evicted', this)">Evicted</button>
+          <button type="button" class="filter-chip chip-immunity" data-filter="immunity" onclick="setStatusFilter('immunity', this)">With Immunity</button>
+          <button type="button" class="filter-chip chip-safe" data-filter="safe" onclick="setStatusFilter('safe', this)">Safe</button>
+        </div>
+
+        <div id="table__entry-container"></div>
+      </div>
+
+      <div id="sharelink-container">
+        <input type="button" id="getlink-button" value="Get link" onclick="generateShareLink()" />
+        <input type="text" placeholder="http://" id="getlink-textbox" readonly />
+        <input type="button" id="copylink-button" value="Copy" onclick="copyLink()" />
+      </div>
+    </div>
+
+    <div id="parent-ranking">
+      <div id="ranking__pyramid" class="ranking__pyramid pyramid-kapamilya">
+        <div id="ranking__title" class="ranking__title"><strong>KAPAMILYA BIG 4</strong></div>
+        <div class="ranking__row"></div>
+        <div class="ranking__row"></div>
+        <div class="ranking__row"></div>
+        <div class="ranking__row"></div>
+      </div>
+      <div id="ranking__pyramid2" class="ranking__pyramid pyramid-kapuso">
+        <div id="ranking__title" class="ranking__title"><strong>KAPUSO BIG 4</strong></div>
+        <div class="ranking__row"></div>
+        <div class="ranking__row"></div>
+        <div class="ranking__row"></div>
+        <div class="ranking__row"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts/csv.js"></script>
+  <script src="scripts/dragdrop.js"></script>
+  <script src="scripts/housematesort.js"></script>
+  <script src="scripts/main.js"></script>
+</body>
+</html>
