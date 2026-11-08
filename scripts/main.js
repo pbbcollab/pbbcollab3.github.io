@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   populateRanking();
   rerenderTable();
+  if (typeof maybeShowNominatedFloat === "function") {
+    maybeShowNominatedFloat();
+  }
 });
 
 function newRanking() {
