@@ -148,8 +148,8 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
   var logoW = Math.round(logo.width * logoScale);
   var logoH = Math.round(logo.height * logoScale);
   var logoX = Math.round((EXPORT_WIDTH - logoW) / 2);
-  // Sit just under the solihiya top border (logo PNG has ~20px transparent padding).
-  var logoY = 28;
+  // Just under the top border, but not tight against it.
+  var logoY = 52;
   ctx.drawImage(logo, logoX, logoY, logoW, logoH);
 
   var stackHeight =
@@ -163,8 +163,9 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
   var footerReserve = 110;
   var availableTop = logoY + logoH + 20;
   var availableBottom = EXPORT_HEIGHT - footerReserve;
+  // Center in the remaining space, then nudge a little higher so it still reads centered.
   var stackTop = Math.round(
-    availableTop + (availableBottom - availableTop - stackHeight) / 2
+    availableTop + (availableBottom - availableTop - stackHeight) / 2 - 48
   );
   // Keep a little breathing room under the logo if centering would collide.
   stackTop = Math.max(stackTop, logoY + logoH + 24);
