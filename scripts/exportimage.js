@@ -133,17 +133,28 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
     })
   );
 
-  // Compact vertical stack: Kapamilya on top, Kapuso close below.
+  // Vertically centered stack with a modest gap between sections.
   var cardW = 310;
   var cardH = 386;
   var gapX = 18;
-  var titleToCards = 8;
-  var sectionGap = 10;
+  var titleBand = 46;
+  var titleToCards = 14;
+  var sectionGap = 64; // modest space between Kapamilya and Kapuso, not wide
 
-  var kapamilyaTitleY = 145;
-  var kapamilyaCardsY = kapamilyaTitleY + 46 + titleToCards;
-  var kapusoTitleY = kapamilyaCardsY + cardH + sectionGap;
-  var kapusoCardsY = kapusoTitleY + 46 + titleToCards;
+  var blockHeight =
+    titleBand +
+    titleToCards +
+    cardH +
+    sectionGap +
+    titleBand +
+    titleToCards +
+    cardH;
+  var contentTop = Math.round((EXPORT_HEIGHT - blockHeight) / 2);
+
+  var kapamilyaTitleY = contentTop + titleBand / 2;
+  var kapamilyaCardsY = contentTop + titleBand + titleToCards;
+  var kapusoTitleY = kapamilyaCardsY + cardH + sectionGap + titleBand / 2;
+  var kapusoCardsY = kapamilyaCardsY + cardH + sectionGap + titleBand + titleToCards;
 
   drawSectionTitle(ctx, "KAPAMILYA BIG 4", EXPORT_WIDTH / 2, kapamilyaTitleY, "#c8102e");
   drawReadyCardRow(ctx, kapamilya, kapamilyaCardsY, cardW, cardH, gapX, cardMap);
