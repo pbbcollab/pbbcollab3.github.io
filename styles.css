@@ -33,26 +33,31 @@ body {
   min-width: 100%;
   color: var(--ink);
   background-color: var(--cream);
-  background-image: url("assets/cream_weave.png");
-  background-size: 420px 420px;
-  background-repeat: repeat;
-  background-position: center;
+  background-image: url("assets/cream_weave_body.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
 #top-banner {
-  padding: 12px 16px 18px;
-  color: white;
+  padding: clamp(22px, 3.4vw, 34px) clamp(18px, 4.5vw, 42px) clamp(26px, 4vw, 40px);
+  color: var(--ink);
   text-align: center;
-  background-image:
-    linear-gradient(180deg, rgba(28, 18, 12, 0.55), rgba(28, 18, 12, 0.72)),
-    url("assets/cream_weave.png");
-  background-size: auto, 360px 360px;
-  background-repeat: no-repeat, repeat;
-  background-position: center, center;
-  border-bottom: 4px solid var(--kapuso);
-  box-shadow: 0 8px 24px rgba(42, 31, 22, 0.18);
+  background-color: var(--cream);
+  background-image: url("assets/header_border.jpg");
+  /* Stretch full decorative frame so sun + corner motifs stay visible */
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 5px solid #c99700;
+  border-bottom-width: 6px;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 248, 230, 0.55),
+    0 10px 28px rgba(42, 31, 22, 0.2);
   animation: bannerIn 0.7s ease-out;
+  min-height: 220px;
 }
 
 #version {
@@ -60,7 +65,8 @@ body {
   font-size: 12px;
   letter-spacing: 0.12em;
   text-align: left;
-  opacity: 0.75;
+  color: var(--muted);
+  opacity: 0.9;
 }
 
 #banner-image {
@@ -68,7 +74,7 @@ body {
   height: auto;
   margin: 4px auto 8px;
   display: block;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.28));
   animation: logoFloat 3.2s ease-in-out infinite;
 }
 
@@ -76,14 +82,17 @@ body {
   font-family: "Bebas Neue", sans-serif;
   font-size: clamp(22px, 4vw, 30px);
   letter-spacing: 0.08em;
+  color: var(--ink);
+  text-shadow: 0 1px 0 rgba(255, 252, 245, 0.7);
 }
 
 #banner-subtitle {
   font-family: "Outfit", sans-serif;
-  font-weight: 600;
-  color: var(--banner-gold);
+  font-weight: 700;
+  color: var(--kapamilya);
   font-size: clamp(12px, 2.4vw, 14px);
   margin-top: 4px;
+  text-shadow: 0 1px 0 rgba(255, 252, 245, 0.65);
 }
 
 #table {
@@ -563,6 +572,17 @@ body {
 }
 
 @media (max-width: 720px) {
+  body {
+    background-attachment: scroll;
+    background-size: cover;
+  }
+
+  #top-banner {
+    border-width: 4px;
+    border-bottom-width: 5px;
+    padding: 16px 14px 20px;
+  }
+
   #table {
     width: min(360px, 94vw);
     height: 42vh;
