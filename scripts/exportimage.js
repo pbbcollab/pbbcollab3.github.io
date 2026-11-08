@@ -136,22 +136,23 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
 
   var logo = await loadImage(EXPORT_LOGO_SRC);
 
-  // Logo on top, then Kapamilya/Kapuso stack — whole block vertically centered.
+  // Logo sits high under the top border; Big 4 stack is centered in the space below.
   var cardW = 310;
   var cardH = 386;
   var gapX = 18;
   var titleBand = 46;
-  var titleToCards = 14;
+  var titleToCards = 68; // little space between section headers and HM cards
   var sectionGap = 64; // modest space between Kapamilya and Kapuso, not wide
-  var logoToTitleGap = 28;
   var logoMaxW = 520;
   var logoScale = Math.min(1, logoMaxW / logo.width);
   var logoW = Math.round(logo.width * logoScale);
   var logoH = Math.round(logo.height * logoScale);
+  var logoX = Math.round((EXPORT_WIDTH - logoW) / 2);
+  // Sit just under the solihiya top border (logo PNG has ~20px transparent padding).
+  var logoY = 28;
+  ctx.drawImage(logo, logoX, logoY, logoW, logoH);
 
-  var blockHeight =
-    logoH +
-    logoToTitleGap +
+  var stackHeight =
     titleBand +
     titleToCards +
     cardH +
@@ -159,13 +160,15 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
     titleBand +
     titleToCards +
     cardH;
-  var contentTop = Math.round((EXPORT_HEIGHT - blockHeight) / 2);
+  var footerReserve = 110;
+  var availableTop = logoY + logoH + 20;
+  var availableBottom = EXPORT_HEIGHT - footerReserve;
+  var stackTop = Math.round(
+    availableTop + (availableBottom - availableTop - stackHeight) / 2
+  );
+  // Keep a little breathing room under the logo if centering would collide.
+  stackTop = Math.max(stackTop, logoY + logoH + 24);
 
-  var logoX = Math.round((EXPORT_WIDTH - logoW) / 2);
-  var logoY = contentTop;
-  ctx.drawImage(logo, logoX, logoY, logoW, logoH);
-
-  var stackTop = contentTop + logoH + logoToTitleGap;
   var kapamilyaTitleY = stackTop + titleBand / 2;
   var kapamilyaCardsY = stackTop + titleBand + titleToCards;
   var kapusoTitleY = kapamilyaCardsY + cardH + sectionGap + titleBand / 2;
