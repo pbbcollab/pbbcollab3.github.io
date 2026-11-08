@@ -1,12 +1,16 @@
 var housemates = [];
 var filteredHousemates = [];
 var ranking = [];
+// Parsed from the URL immediately (before CSV load) so share links never race.
+var pendingRankingIds = null;
 
 document.addEventListener("DOMContentLoaded", async function () {
   ranking = newRanking();
-  // Housemates must load before applying ?r= so share links can resolve IDs.
+  pendingRankingIds = parseRankingIdsFromUrl();
   await readFromCSV("./housemate_info.csv");
-  getRanking();
+  if (pendingRankingIds) {
+    applyRankingIds(pendingRankingIds);
+  }
   populateRanking();
   rerenderTable();
 });
@@ -100,45 +104,75 @@ function findHousemateById(id) {
   return newHousemate();
 }
 
-function getRanking() {
+function parseRankingIdsFromUrl() {
   var urlParams = new URLSearchParams(window.location.search);
-  if (!urlParams.has("r")) return;
+  var raw = urlParams.get("r");
+  if (!raw) {
+    // Fallback: allow hash links like #r=2-3-5-6-0-1-4-7
+    var hash = window.location.hash || "";
+    var hashMatch = hash.match(/[#&?]r=([^&]+)/);
+    if (hashMatch) raw = decodeURIComponent(hashMatch[1]);
+  }
+  if (!raw) return null;
 
-  let encoded = urlParams.get("r");
-  if (!encoded) return;
+  var ids = decodeRankingPayload(raw);
+  if (!ids || ids.length === 0) return null;
+  while (ids.length < 8) ids.push(-1);
+  return ids.slice(0, 8);
+}
 
-  let rankString;
-  try {
-    // Support both encodeURIComponent'd links and older unencoded ones.
-    rankString = atob(decodeURIComponent(encoded));
-  } catch (err) {
-    try {
-      rankString = atob(encoded);
-    } catch (err2) {
-      console.error("Could not decode share link ranking:", err2);
-      return;
+function decodeRankingPayload(raw) {
+  // New format: 2-3-5-6-0-1-4-7 (x or empty = blank slot). Avoids base64 mangling.
+  if (/^[\dxX,\-_.]+$/.test(raw) && raw.length <= 40) {
+    var parts = raw.split(/[-_,.]/);
+    if (parts.length >= 1 && parts.length <= 8) {
+      return parts.map(function (part) {
+        if (!part || part.toLowerCase() === "x") return -1;
+        var n = parseInt(part, 10);
+        return Number.isNaN(n) ? -1 : n;
+      });
     }
   }
 
-  let rankingIds = [];
-  for (let i = 0; i < rankString.length; i += 2) {
-    let housemateId = rankString.substr(i, 2);
-    if (housemateId === "XX") rankingIds.push(-1);
-    else rankingIds.push(parseInt(housemateId, 10));
+  // Legacy base64 format: pairs of digits / XX, e.g. btoa("02030506...")
+  var rankString = null;
+  try {
+    rankString = atob(raw);
+  } catch (err) {
+    try {
+      rankString = atob(decodeURIComponent(raw));
+    } catch (err2) {
+      console.error("Could not decode share link ranking:", err2);
+      return null;
+    }
   }
+  if (!rankString) return null;
 
-  for (let i = 0; i < rankingIds.length && i < ranking.length; i++) {
-    let housemateId = rankingIds[i];
+  var rankingIds = [];
+  for (var i = 0; i < rankString.length; i += 2) {
+    var token = rankString.substr(i, 2);
+    if (token === "XX" || token === "xx") rankingIds.push(-1);
+    else {
+      var id = parseInt(token, 10);
+      rankingIds.push(Number.isNaN(id) ? -1 : id);
+    }
+  }
+  return rankingIds;
+}
+
+function applyRankingIds(rankingIds) {
+  for (var i = 0; i < rankingIds.length && i < ranking.length; i++) {
+    var housemateId = rankingIds[i];
     if (housemateId < 0 || Number.isNaN(housemateId)) {
       ranking[i] = newHousemate();
+      continue;
+    }
+    var housemate = findHousemateById(housemateId);
+    if (housemate.id >= 0) {
+      housemate.selected = true;
+      ranking[i] = housemate;
     } else {
-      let housemate = findHousemateById(housemateId);
-      if (housemate.id >= 0) {
-        housemate.selected = true;
-        ranking[i] = housemate;
-      } else {
-        ranking[i] = newHousemate();
-      }
+      ranking[i] = newHousemate();
     }
   }
 }
@@ -357,18 +391,17 @@ function swapHousemates(fromIndex, toIndex) {
 }
 
 function generateShareLink() {
-  let rankString = "";
-  for (let i = 0; i < ranking.length; i++) {
-    if (ranking[i].id < 0) {
-      rankString += "XX";
-    } else {
-      rankString += ("0" + ranking[i].id).slice(-2);
-    }
+  var parts = [];
+  for (var i = 0; i < ranking.length; i++) {
+    parts.push(ranking[i].id < 0 ? "x" : String(ranking[i].id));
   }
-  let encoded = encodeURIComponent(btoa(rankString));
-  let link = window.location.origin + window.location.pathname + "?r=" + encoded;
-  let textbox = document.getElementById("getlink-textbox");
-  let copyBtn = document.getElementById("copylink-button");
+  // Plain IDs survive copy/paste and chat apps better than base64 padding.
+  var payload = parts.join("-");
+  var path = window.location.pathname;
+  if (!path || path === "") path = "/";
+  var link = window.location.origin + path + "?r=" + encodeURIComponent(payload);
+  var textbox = document.getElementById("getlink-textbox");
+  var copyBtn = document.getElementById("copylink-button");
   textbox.style.display = "inline-block";
   copyBtn.style.display = "inline-block";
   textbox.value = link;
