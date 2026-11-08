@@ -1,9 +1,14 @@
 /* global ranking */
 
-var EXPORT_WIDTH = 1600;
-var EXPORT_HEIGHT = 2000;
+var EXPORT_WIDTH = 1583;
+var EXPORT_HEIGHT = 1980;
 var EXPORT_FRAME_SRC = "assets/export/export_frame.jpg";
-var EXPORT_PORTRAIT_DIR = "assets/export/portraits/";
+var EXPORT_CARD_DIR = "assets/export/cards/";
+
+// CSV shortname "Shea" maps to collage filename "shereenia".
+var EXPORT_NAME_ALIASES = {
+  shea: "shereenia",
+};
 
 function saveBig4Image() {
   var kapamilya = ranking.slice(0, 4);
@@ -87,12 +92,19 @@ async function ensureExportFonts() {
   try {
     await Promise.all([
       document.fonts.load('800 64px "Archivo Black"'),
-      document.fonts.load('800 36px "Archivo Black"'),
-      document.fonts.load('700 28px "Outfit"'),
+      document.fonts.load('700 22px "Outfit"'),
     ]);
   } catch (err) {
     // Fall back to system fonts if webfont load fails.
   }
+}
+
+function exportCardKey(housemate) {
+  if (!housemate || housemate.id < 0 || !housemate.shortname) return null;
+  var short = String(housemate.shortname).toLowerCase();
+  var fileStem = EXPORT_NAME_ALIASES[short] || short;
+  var team = housemate.agencysm ? "kapamilya" : "kapuso";
+  return team + "_" + fileStem;
 }
 
 async function generateBig4ExportImage(kapamilya, kapuso) {
@@ -106,43 +118,44 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
   var frame = await loadImage(EXPORT_FRAME_SRC);
   ctx.drawImage(frame, 0, 0, EXPORT_WIDTH, EXPORT_HEIGHT);
 
-  // Soft cream wash so titles/cards stay readable over busy corners.
-  ctx.fillStyle = "rgba(246, 240, 224, 0.18)";
-  ctx.fillRect(120, 120, EXPORT_WIDTH - 240, EXPORT_HEIGHT - 240);
-
-  var portraitNames = [];
+  var cardKeys = [];
   [kapamilya, kapuso].forEach(function (group) {
     group.forEach(function (hm) {
-      if (hm && hm.id >= 0 && hm.shortname) {
-        portraitNames.push(String(hm.shortname).toLowerCase());
-      }
+      var key = exportCardKey(hm);
+      if (key) cardKeys.push(key);
     });
   });
 
-  var portraitMap = {};
+  var cardMap = {};
   await Promise.all(
-    portraitNames.map(async function (name) {
-      var img = await loadImageOptional(EXPORT_PORTRAIT_DIR + name + ".jpg");
-      if (!img && ranking) {
-        // Fallback to circular list assets if promo crop is missing.
-        img = await loadImageOptional("assets/housemates/" + name + ".png");
-      }
-      portraitMap[name] = img;
+    cardKeys.map(async function (key) {
+      cardMap[key] = await loadImageOptional(EXPORT_CARD_DIR + key + ".png");
     })
   );
 
-  drawSectionTitle(ctx, "KAPAMILYA BIG 4", EXPORT_WIDTH / 2, 210, "#c8102e");
-  await drawCardRow(ctx, kapamilya, 320, "#c8102e", portraitMap);
+  // Compact vertical stack: Kapamilya on top, Kapuso close below.
+  var cardW = 310;
+  var cardH = 386;
+  var gapX = 18;
+  var titleToCards = 8;
+  var sectionGap = 10;
 
-  drawSectionTitle(ctx, "KAPUSO BIG 4", EXPORT_WIDTH / 2, 1120, "#0057b8");
-  await drawCardRow(ctx, kapuso, 1230, "#0057b8", portraitMap);
+  var kapamilyaTitleY = 145;
+  var kapamilyaCardsY = kapamilyaTitleY + 46 + titleToCards;
+  var kapusoTitleY = kapamilyaCardsY + cardH + sectionGap;
+  var kapusoCardsY = kapusoTitleY + 46 + titleToCards;
 
-  // Footer credit
+  drawSectionTitle(ctx, "KAPAMILYA BIG 4", EXPORT_WIDTH / 2, kapamilyaTitleY, "#c8102e");
+  drawReadyCardRow(ctx, kapamilya, kapamilyaCardsY, cardW, cardH, gapX, cardMap);
+
+  drawSectionTitle(ctx, "KAPUSO BIG 4", EXPORT_WIDTH / 2, kapusoTitleY, "#0057b8");
+  drawReadyCardRow(ctx, kapuso, kapusoCardsY, cardW, cardH, gapX, cardMap);
+
   ctx.save();
   ctx.fillStyle = "rgba(42, 31, 22, 0.7)";
-  ctx.font = '700 22px "Outfit", "Arial", sans-serif';
+  ctx.font = '700 20px "Outfit", "Arial", sans-serif';
   ctx.textAlign = "center";
-  ctx.fillText("PBB COLLAB 3.0  •  MY BIG 4", EXPORT_WIDTH / 2, EXPORT_HEIGHT - 90);
+  ctx.fillText("PBB COLLAB 3.0  •  MY BIG 4", EXPORT_WIDTH / 2, EXPORT_HEIGHT - 70);
   ctx.restore();
 
   return new Promise(function (resolve, reject) {
@@ -158,19 +171,15 @@ function drawSectionTitle(ctx, text, x, y, color) {
   ctx.translate(x, y);
   ctx.rotate((-3 * Math.PI) / 180);
 
-  var font = '800 70px "Archivo Black", "Arial Black", "Impact", sans-serif';
-  ctx.font = font;
+  ctx.font = '800 58px "Archivo Black", "Arial Black", "Impact", sans-serif';
   var metrics = ctx.measureText(text);
-  var padX = 36;
-  var padY = 18;
-  var w = metrics.width + padX * 2;
-  var h = 92;
+  var w = metrics.width + 56;
+  var h = 78;
 
-  // White tilted banner
   ctx.fillStyle = "#fffdf8";
-  ctx.shadowColor = "rgba(0,0,0,0.28)";
-  ctx.shadowBlur = 18;
-  ctx.shadowOffsetY = 8;
+  ctx.shadowColor = "rgba(0,0,0,0.25)";
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 6;
   roundRect(ctx, -w / 2, -h / 2, w, h, 10);
   ctx.fill();
 
@@ -182,179 +191,47 @@ function drawSectionTitle(ctx, text, x, y, color) {
   ctx.restore();
 }
 
-async function drawCardRow(ctx, housemates, top, accent, portraitMap) {
+function drawReadyCardRow(ctx, housemates, top, cardW, cardH, gapX, cardMap) {
   var count = 4;
-  var gap = 28;
-  var cardW = 300;
-  var cardH = 420;
-  var totalW = count * cardW + (count - 1) * gap;
+  var totalW = count * cardW + (count - 1) * gapX;
   var startX = (EXPORT_WIDTH - totalW) / 2;
 
   for (var i = 0; i < count; i++) {
     var hm = housemates[i];
-    var x = startX + i * (cardW + gap);
-    var portrait = null;
-    var label = "";
-    if (hm && hm.id >= 0) {
-      label = String(hm.shortname || "").toUpperCase();
-      portrait = portraitMap[String(hm.shortname || "").toLowerCase()] || null;
-    }
-    drawHousemateCard(ctx, x, top, cardW, cardH, accent, portrait, label, i + 1);
+    var x = startX + i * (cardW + gapX);
+    var key = exportCardKey(hm);
+    var card = key ? cardMap[key] : null;
+    drawReadyCard(ctx, x, top, cardW, cardH, card, i + 1);
   }
 }
 
-function drawHousemateCard(ctx, x, y, w, h, accent, portrait, label, rank) {
+function drawReadyCard(ctx, x, y, w, h, cardImg, rank) {
   ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.22)";
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 6;
 
-  // Outer shadow
-  ctx.shadowColor = "rgba(0, 0, 0, 0.28)";
-  ctx.shadowBlur = 16;
-  ctx.shadowOffsetY = 8;
-
-  // Black photo plate with colored border
-  ctx.fillStyle = "#111111";
-  ctx.strokeStyle = accent;
-  ctx.lineWidth = 14;
-  roundRect(ctx, x, y, w, h, 8);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.shadowColor = "transparent";
-
-  // Inner white stroke
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 4;
-  roundRect(ctx, x + 12, y + 12, w - 24, h - 24, 4);
-  ctx.stroke();
-
-  // Portrait area
-  var photoX = x + 18;
-  var photoY = y + 18;
-  var photoW = w - 36;
-  var photoH = h - 110;
-  ctx.save();
-  ctx.beginPath();
-  roundRect(ctx, photoX, photoY, photoW, photoH, 2);
-  ctx.clip();
-  ctx.fillStyle = "#1a1a1a";
-  ctx.fillRect(photoX, photoY, photoW, photoH);
-
-  if (portrait) {
-    drawImageCover(ctx, portrait, photoX, photoY, photoW, photoH);
+  if (cardImg) {
+    // Use the provided card artwork as-is (already includes border + name).
+    ctx.drawImage(cardImg, x, y, w, h);
   } else {
-    ctx.fillStyle = "#2a2a2a";
-    ctx.fillRect(photoX, photoY, photoW, photoH);
-    ctx.fillStyle = "rgba(255,255,255,0.35)";
-    ctx.font = '700 42px "Outfit", sans-serif';
+    // Empty slot placeholder — no team-colored border.
+    ctx.fillStyle = "rgba(255, 253, 248, 0.92)";
+    roundRect(ctx, x, y, w, h, 8);
+    ctx.fill();
+    ctx.shadowColor = "transparent";
+    ctx.strokeStyle = "rgba(42, 31, 22, 0.18)";
+    ctx.lineWidth = 2;
+    roundRect(ctx, x + 1, y + 1, w - 2, h - 2, 8);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(42, 31, 22, 0.35)";
+    ctx.font = '800 42px "Archivo Black", "Arial Black", sans-serif';
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(String(rank), photoX + photoW / 2, photoY + photoH / 2);
+    ctx.fillText(String(rank), x + w / 2, y + h / 2);
   }
-  ctx.restore();
-
-  // Rank chip
-  ctx.fillStyle = accent;
-  ctx.beginPath();
-  ctx.arc(x + 34, y + 34, 18, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  ctx.font = '800 20px "Archivo Black", "Arial Black", sans-serif';
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(String(rank), x + 34, y + 35);
-
-  // Corner motif (top-left + bottom-right)
-  drawCornerMotif(ctx, x + 8, y + 8, 54, accent, false);
-  drawCornerMotif(ctx, x + w - 8, y + h - 8, 54, accent, true);
-
-  // Name plate
-  var plateH = 58;
-  var plateY = y + h - plateH - 18;
-  ctx.fillStyle = "#fffdf8";
-  ctx.fillRect(x + 22, plateY, w - 44, plateH);
-  ctx.strokeStyle = accent;
-  ctx.lineWidth = 3;
-  ctx.strokeRect(x + 22, plateY, w - 44, plateH);
-
-  ctx.fillStyle = accent;
-  ctx.font = '800 28px "Archivo Black", "Arial Black", "Impact", sans-serif';
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  var name = label || "—";
-  fitCenteredText(ctx, name, x + w / 2, plateY + plateH / 2 + 1, w - 60, 28);
 
   ctx.restore();
-}
-
-function drawCornerMotif(ctx, anchorX, anchorY, size, accent, flip) {
-  ctx.save();
-  ctx.translate(anchorX, anchorY);
-  if (flip) ctx.rotate(Math.PI);
-
-  // Triangular woven corner
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(size, 0);
-  ctx.lineTo(0, size);
-  ctx.closePath();
-  ctx.fillStyle = accent;
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(4, 4);
-  ctx.lineTo(size - 14, 4);
-  ctx.lineTo(4, size - 14);
-  ctx.closePath();
-  ctx.fillStyle = "#f5c518";
-  ctx.fill();
-
-  ctx.fillStyle = "#ffffff";
-  ctx.beginPath();
-  ctx.moveTo(10, 10);
-  ctx.lineTo(28, 10);
-  ctx.lineTo(19, 19);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = accent;
-  ctx.fillRect(12, 12, 6, 6);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(20, 12, 6, 6);
-  ctx.fillStyle = "#f5c518";
-  ctx.fillRect(12, 20, 6, 6);
-
-  ctx.restore();
-}
-
-function drawImageCover(ctx, img, x, y, w, h) {
-  var ir = img.width / img.height;
-  var tr = w / h;
-  var dw;
-  var dh;
-  var dx;
-  var dy;
-  if (ir > tr) {
-    dh = h;
-    dw = h * ir;
-    dx = x - (dw - w) / 2;
-    dy = y;
-  } else {
-    dw = w;
-    dh = w / ir;
-    dx = x;
-    dy = y - (dh - h) / 2;
-  }
-  ctx.drawImage(img, dx, dy, dw, dh);
-}
-
-function fitCenteredText(ctx, text, x, y, maxWidth, baseSize) {
-  var size = baseSize;
-  ctx.font = '800 ' + size + 'px "Archivo Black", "Arial Black", "Impact", sans-serif';
-  while (size > 16 && ctx.measureText(text).width > maxWidth) {
-    size -= 1;
-    ctx.font = '800 ' + size + 'px "Archivo Black", "Arial Black", "Impact", sans-serif';
-  }
-  ctx.fillText(text, x, y);
 }
 
 function roundRect(ctx, x, y, w, h, r) {
