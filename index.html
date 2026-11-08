@@ -7,13 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <meta name="description" content="Rank your Kapamilya and Kapuso Big 4 for Pinoy Big Brother Collab 3.0." />
   <link rel="icon" type="image/png" href="/favicon.png">
-  <link rel="stylesheet" type="text/css" media="screen" href="styles.css?v=3.0.16" />
+  <link rel="stylesheet" type="text/css" media="screen" href="styles.css?v=3.0.17" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="top-banner">
-    <p id="version">v3.0.16</p>
+    <p id="version">v3.0.17</p>
     <img id="banner-image" src="assets/logo_pbb.png" alt="Pinoy Big Brother Collab 3.0" />
     <p id="banner-title">WHO WINS... YOU DECIDE!</p>
     <p id="banner-subtitle">Who are your KAPAMILYA and KAPUSO BIG 4?</p>
@@ -85,15 +85,44 @@
     </div>
   </div>
 
+  <div id="nominated-float" class="nominated-float" hidden aria-hidden="true" onclick="closeNominatedFloat()">
+    <div class="nominated-float__backdrop" aria-hidden="true"></div>
+    <div
+      class="nominated-float__content"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="nominated-float-heading"
+      onclick="event.stopPropagation()"
+    >
+      <button
+        type="button"
+        id="nominated-float-close"
+        class="nominated-float__close"
+        onclick="closeNominatedFloat()"
+        aria-label="Close nominated housemates"
+      >×</button>
+      <p id="nominated-float-heading" class="nominated-float__heading">NOMINATED HOUSEMATES</p>
+      <section class="nominated-float__section" aria-label="Kapamilya nominated">
+        <h2 class="nominated-float__title nominated-float__title--kapamilya">KAPAMILYA NOMINATED</h2>
+        <div id="nominated-float-kapamilya" class="nominated-float__cards"></div>
+      </section>
+      <section class="nominated-float__section" aria-label="Kapuso nominated">
+        <h2 class="nominated-float__title nominated-float__title--kapuso">KAPUSO NOMINATED</h2>
+        <div id="nominated-float-kapuso" class="nominated-float__cards"></div>
+      </section>
+    </div>
+  </div>
+
   <div id="visitor-badge" class="visitor-badge" hidden aria-hidden="true" aria-live="polite">
     You’re the #<span id="visitor-count">0</span> visitor.
   </div>
 
-  <script src="scripts/csv.js?v=3.0.16"></script>
-  <script src="scripts/dragdrop.js?v=3.0.16"></script>
-  <script src="scripts/housematesort.js?v=3.0.16"></script>
-  <script src="scripts/main.js?v=3.0.16"></script>
-  <script src="scripts/exportimage.js?v=3.0.16"></script>
-  <script src="scripts/visitor.js?v=3.0.16"></script>
+  <script src="scripts/csv.js?v=3.0.17"></script>
+  <script src="scripts/dragdrop.js?v=3.0.17"></script>
+  <script src="scripts/housematesort.js?v=3.0.17"></script>
+  <script src="scripts/main.js?v=3.0.17"></script>
+  <script src="scripts/exportimage.js?v=3.0.17"></script>
+  <script src="scripts/nominatedfloat.js?v=3.0.17"></script>
+  <script src="scripts/visitor.js?v=3.0.17"></script>
 </body>
 </html>
