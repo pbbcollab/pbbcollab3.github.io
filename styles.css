@@ -456,18 +456,23 @@ body.export-modal-open {
   pointer-events: none;
 }
 
+/* Match pbbcollab.github.io nominated stamp overlay */
 .table__entry-nominated,
 .ranking__entry-nominated {
   position: absolute;
-  top: -4px;
-  left: -4px;
-  width: 68px;
-  height: 68px;
+  box-sizing: border-box;
+  top: 2px;
+  left: -2px;
+  right: 0;
+  margin: auto;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   background-image: url(assets/nominated.png);
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: center center;
+  background-origin: content-box;
   pointer-events: none;
 }
 
