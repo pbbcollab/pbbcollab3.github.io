@@ -11,6 +11,9 @@ var EXPORT_NAME_ALIASES = {
   shea: "shereenia",
 };
 
+var exportPreviewBlob = null;
+var exportPreviewUrl = null;
+
 function saveBig4Image() {
   var kapamilya = ranking.slice(0, 4);
   var kapuso = ranking.slice(4, 8);
@@ -23,24 +26,15 @@ function saveBig4Image() {
     return;
   }
 
-  var ok = window.confirm(
-    "Save your Kapamilya Big 4 and Kapuso Big 4 image to Photos/Gallery?"
-  );
-  if (!ok) return;
-
   var btn = document.getElementById("saveimage-button");
   if (btn) {
     btn.disabled = true;
-    btn.value = "Saving...";
+    btn.value = "Generating...";
   }
 
   generateBig4ExportImage(kapamilya, kapuso)
     .then(function (blob) {
-      var filename =
-        "PBB-Collab3-Big4-" +
-        new Date().toISOString().slice(0, 10) +
-        ".png";
-      downloadImageBlob(blob, filename);
+      openExportPreview(blob);
     })
     .catch(function (err) {
       console.error(err);
@@ -52,6 +46,56 @@ function saveBig4Image() {
         btn.value = "Save Big 4 Image";
       }
     });
+}
+
+function openExportPreview(blob) {
+  clearExportPreviewUrl();
+  exportPreviewBlob = blob;
+  exportPreviewUrl = URL.createObjectURL(blob);
+
+  var modal = document.getElementById("export-preview-modal");
+  var img = document.getElementById("export-preview-image");
+  if (!modal || !img) return;
+
+  img.src = exportPreviewUrl;
+  modal.hidden = false;
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("export-modal-open");
+
+  var downloadBtn = document.getElementById("export-preview-download");
+  if (downloadBtn) downloadBtn.focus();
+}
+
+function closeExportPreview() {
+  var modal = document.getElementById("export-preview-modal");
+  var img = document.getElementById("export-preview-image");
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+  }
+  if (img) img.removeAttribute("src");
+  document.body.classList.remove("export-modal-open");
+  clearExportPreviewUrl();
+  exportPreviewBlob = null;
+}
+
+function clearExportPreviewUrl() {
+  if (exportPreviewUrl) {
+    URL.revokeObjectURL(exportPreviewUrl);
+    exportPreviewUrl = null;
+  }
+}
+
+function downloadExportPreview() {
+  if (!exportPreviewBlob) {
+    alert("Generate a Big 4 image first.");
+    return;
+  }
+  var filename =
+    "PBB-Collab3-Big4-" +
+    new Date().toISOString().slice(0, 10) +
+    ".png";
+  downloadImageBlob(exportPreviewBlob, filename);
 }
 
 function downloadImageBlob(blob, filename) {
@@ -67,6 +111,12 @@ function downloadImageBlob(blob, filename) {
     URL.revokeObjectURL(url);
   }, 2000);
 }
+
+document.addEventListener("keydown", function (event) {
+  if (event.key !== "Escape") return;
+  var modal = document.getElementById("export-preview-modal");
+  if (modal && !modal.hidden) closeExportPreview();
+});
 
 function loadImage(src) {
   return new Promise(function (resolve, reject) {
