@@ -142,14 +142,14 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
   var gapX = 18;
   var titleBand = 46;
   var titleToCards = 68; // little space between section headers and HM cards
-  var sectionGap = 64; // modest space between Kapamilya and Kapuso, not wide
+  var sectionGap = 86; // a little more space between Kapamilya and Kapuso
   var logoMaxW = 520;
   var logoScale = Math.min(1, logoMaxW / logo.width);
   var logoW = Math.round(logo.width * logoScale);
   var logoH = Math.round(logo.height * logoScale);
   var logoX = Math.round((EXPORT_WIDTH - logoW) / 2);
-  // Just under the top border, but not tight against it.
-  var logoY = 52;
+  // A bit lower under the top border.
+  var logoY = 72;
   ctx.drawImage(logo, logoX, logoY, logoW, logoH);
 
   var stackHeight =
@@ -163,12 +163,12 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
   var footerReserve = 110;
   var availableTop = logoY + logoH + 20;
   var availableBottom = EXPORT_HEIGHT - footerReserve;
-  // Center in the remaining space, then nudge a little higher so it still reads centered.
+  // Center in the remaining space, then nudge a bit higher so it still reads centered.
   var stackTop = Math.round(
-    availableTop + (availableBottom - availableTop - stackHeight) / 2 - 48
+    availableTop + (availableBottom - availableTop - stackHeight) / 2 - 78
   );
   // Keep a little breathing room under the logo if centering would collide.
-  stackTop = Math.max(stackTop, logoY + logoH + 24);
+  stackTop = Math.max(stackTop, logoY + logoH + 18);
 
   var kapamilyaTitleY = stackTop + titleBand / 2;
   var kapamilyaCardsY = stackTop + titleBand + titleToCards;
