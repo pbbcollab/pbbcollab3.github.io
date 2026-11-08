@@ -291,9 +291,11 @@ body.export-modal-open {
 .export-modal__header h2 {
   margin: 0;
   font-family: "Bebas Neue", sans-serif;
-  font-size: 24px;
+  font-size: clamp(16px, 4.2vw, 22px);
   letter-spacing: 0.04em;
   color: var(--ink);
+  line-height: 1.15;
+  max-width: calc(100% - 36px);
 }
 
 .export-modal__close {
