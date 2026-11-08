@@ -199,7 +199,16 @@ body {
   display: flex;
 }
 
-#getlink-button {
+#saveimage-container {
+  margin: 0 10px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+#getlink-button,
+#saveimage-button {
   border: none;
   border-radius: 8px;
   padding: 6px 12px;
@@ -211,8 +220,26 @@ body {
   cursor: pointer;
 }
 
-#getlink-button:active {
+#saveimage-button {
+  background: linear-gradient(135deg, #0f172a, var(--kapuso));
+  min-width: 168px;
+}
+
+#getlink-button:active,
+#saveimage-button:active {
   transform: scale(0.98);
+}
+
+#saveimage-button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+#saveimage-hint {
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 260px;
+  line-height: 1.35;
 }
 
 #getlink-textbox {
