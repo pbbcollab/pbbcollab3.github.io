@@ -4,6 +4,7 @@ var EXPORT_WIDTH = 1583;
 var EXPORT_HEIGHT = 1980;
 var EXPORT_FRAME_SRC = "assets/export/export_frame.jpg";
 var EXPORT_CARD_DIR = "assets/export/cards/";
+var EXPORT_LOGO_SRC = "assets/logo_pbb.png";
 
 // CSV shortname "Shea" maps to collage filename "shereenia".
 var EXPORT_NAME_ALIASES = {
@@ -133,15 +134,24 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
     })
   );
 
-  // Vertically centered stack with a modest gap between sections.
+  var logo = await loadImage(EXPORT_LOGO_SRC);
+
+  // Logo on top, then Kapamilya/Kapuso stack — whole block vertically centered.
   var cardW = 310;
   var cardH = 386;
   var gapX = 18;
   var titleBand = 46;
   var titleToCards = 14;
   var sectionGap = 64; // modest space between Kapamilya and Kapuso, not wide
+  var logoToTitleGap = 28;
+  var logoMaxW = 520;
+  var logoScale = Math.min(1, logoMaxW / logo.width);
+  var logoW = Math.round(logo.width * logoScale);
+  var logoH = Math.round(logo.height * logoScale);
 
   var blockHeight =
+    logoH +
+    logoToTitleGap +
     titleBand +
     titleToCards +
     cardH +
@@ -151,8 +161,13 @@ async function generateBig4ExportImage(kapamilya, kapuso) {
     cardH;
   var contentTop = Math.round((EXPORT_HEIGHT - blockHeight) / 2);
 
-  var kapamilyaTitleY = contentTop + titleBand / 2;
-  var kapamilyaCardsY = contentTop + titleBand + titleToCards;
+  var logoX = Math.round((EXPORT_WIDTH - logoW) / 2);
+  var logoY = contentTop;
+  ctx.drawImage(logo, logoX, logoY, logoW, logoH);
+
+  var stackTop = contentTop + logoH + logoToTitleGap;
+  var kapamilyaTitleY = stackTop + titleBand / 2;
+  var kapamilyaCardsY = stackTop + titleBand + titleToCards;
   var kapusoTitleY = kapamilyaCardsY + cardH + sectionGap + titleBand / 2;
   var kapusoCardsY = kapamilyaCardsY + cardH + sectionGap + titleBand + titleToCards;
 
