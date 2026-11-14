@@ -7,15 +7,12 @@ var pendingRankingIds = null;
 document.addEventListener("DOMContentLoaded", async function () {
   ranking = newRanking();
   pendingRankingIds = parseRankingIdsFromUrl();
-  await readFromCSV("./housemate_info.csv?v=3.0.20");
+  await readFromCSV("./housemate_info.csv?v=3.0.21");
   if (pendingRankingIds) {
     applyRankingIds(pendingRankingIds);
   }
   populateRanking();
   rerenderTable();
-  if (typeof maybeShowNominatedFloat === "function") {
-    maybeShowNominatedFloat();
-  }
 });
 
 function newRanking() {
